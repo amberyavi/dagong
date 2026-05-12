@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>幸福打工人 — 华夏幸福职场生存模拟器</title>
+<style>
+:root {
+  --blue: #1a4a8a;
+  --blue-light: #2d6ec7;
+  --blue-pale: #e8f0fb;
+  --gray: #6b7280;
+  --gray-light: #f3f4f6;
+  --red: #dc2626;
+  --green: #16a34a;
+  --yellow: #ca8a04;
+  --orange: #ea580c;
+  --text: #1f2937;
+  --border: #d1d5db;
+  --shadow: 0 2px 12px rgba(0,0,0,0.10);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#e9eef6;font-family:'Microsoft YaHei','微软雅黑',sans-serif;color:var(--text);min-height:100vh;}
+
+/* ===== 顶部导航 ===== */
+#topbar{background:var(--blue);color:#fff;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.25);}
+#topbar .logo{font-size:18px;font-weight:bold;letter-spacing:2px;}
+#topbar .subtitle{font-size:12px;opacity:.75;margin-top:2px;}
+#month-badge{background:#fff;color:var(--blue);border-radius:20px;padding:4px 14px;font-weight:bold;font-size:14px;}
+
+/* ===== 主容器 ===== */
+#app{max-width:820px;margin:0 auto;padding:16px;}
+
+/* ===== 开场封面 ===== */
+#screen-cover{text-align:center;padding:60px 20px;}
+#screen-cover h1{font-size:42px;color:var(--blue);text-shadow:0 2px 8px rgba(26,74,138,.15);}
+#screen-cover .tagline{color:var(--gray);margin:12px 0 32px;font-size:16px;}
+.cover-card{background:#fff;border-radius:16px;padding:28px;box-shadow:var(--shadow);margin-bottom:20px;text-align:left;max-width:560px;margin-left:auto;margin-right:auto;}
+.cover-card h3{color:var(--blue);margin-bottom:10px;}
+.cover-card p{color:var(--gray);line-height:1.7;font-size:14px;}
+
+/* ===== 角色创建 ===== */
+#screen-create{display:none;}
+.section-title{font-size:20px;font-weight:bold;color:var(--blue);margin:20px 0 12px;border-left:4px solid var(--blue-light);padding-left:10px;}
+.card{background:#fff;border-radius:12px;padding:20px;box-shadow:var(--shadow);margin-bottom:16px;}
+.card-title{font-size:15px;font-weight:bold;color:var(--text);margin-bottom:12px;}
+
+/* 出身选择 */
+.origin-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.origin-btn{border:2px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;background:#fff;text-align:left;transition:all .2s;}
+.origin-btn:hover{border-color:var(--blue-light);background:var(--blue-pale);}
+.origin-btn.selected{border-color:var(--blue);background:var(--blue-pale);}
+.origin-btn .ob-name{font-weight:bold;font-size:14px;color:var(--blue);}
+.origin-btn .ob-tag{font-size:12px;color:var(--gray);margin:3px 0;}
+.origin-btn .ob-buff{font-size:11px;color:var(--green);}
+.origin-btn .ob-debuff{font-size:11px;color:var(--red);}
+
+/* 性格选择 */
+.trait-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.trait-btn{border:2px solid var(--border);border-radius:8px;padding:10px;cursor:pointer;background:#fff;text-align:center;transition:all .2s;}
+.trait-btn:hover{border-color:var(--blue-light);background:var(--blue-pale);}
+.trait-btn.selected{border-color:var(--blue);background:var(--blue-pale);}
+.trait-btn .tb-name{font-weight:bold;font-size:13px;}
+.trait-btn .tb-sub{font-size:11px;color:var(--gray);margin-top:2px;}
+
+/* 属性分配 */
+.stat-row{display:flex;align-items:center;margin-bottom:10px;}
+.stat-label{width:90px;font-size:13px;font-weight:bold;}
+.stat-desc{width:160px;font-size:11px;color:var(--gray);}
+.stat-controls{display:flex;align-items:center;gap:8px;}
+.stat-btn{width:28px;height:28px;border:1px solid var(--border);border-radius:6px;background:#fff;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.stat-btn:hover{background:var(--blue-pale);border-color:var(--blue-light);}
+.stat-val{width:32px;text-align:center;font-weight:bold;font-size:15px;}
+.stat-bar-wrap{flex:1;height:8px;background:#e5e7eb;border-radius:4px;margin-left:10px;overflow:hidden;}
+.stat-bar{height:100%;background:var(--blue-light);border-radius:4px;transition:width .2s;}
+#points-left{font-size:14px;color:var(--orange);font-weight:bold;text-align:right;margin-bottom:8px;}
+
+/* ===== 主游戏界面 ===== */
+#screen-game{display:none;}
+/* 状态面板 */
+#status-panel{background:#fff;border-radius:12px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px;}
+.status-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.stat-item{text-align:center;}
+.stat-item .si-label{font-size:11px;color:var(--gray);}
+.stat-item .si-val{font-size:13px;font-weight:bold;color:var(--text);}
+.progress-wrap{height:6px;background:#e5e7eb;border-radius:3px;margin-top:3px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:3px;transition:width .4s;}
+.fill-green{background:#16a34a;}
+.fill-blue{background:#2d6ec7;}
+.fill-yellow{background:#ca8a04;}
+.fill-red{background:#dc2626;}
+.fill-orange{background:#ea580c;}
+.fill-purple{background:#7c3aed;}
+.fill-gray{background:#6b7280;}
+#money-display{text-align:center;padding:8px 0 0;font-size:13px;color:var(--gray);}
+#money-display span{color:var(--blue);font-weight:bold;font-size:16px;}
+
+/* 内网新闻 */
+#intranet-news{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 16px;margin-bottom:14px;font-size:13px;}
+#intranet-news .news-title{font-weight:bold;color:var(--yellow);margin-bottom:6px;}
+#intranet-news .news-body{color:#78350f;line-height:1.6;}
+
+/* 事件区域 */
+#event-area{background:#fff;border-radius:12px;padding:22px;box-shadow:var(--shadow);margin-bottom:14px;}
+.event-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.event-tag{background:var(--blue);color:#fff;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:bold;}
+.event-title{font-size:17px;font-weight:bold;color:var(--text);}
+.event-body{font-size:14px;line-height:1.8;color:#374151;background:#f9fafb;border-radius:8px;padding:14px;margin-bottom:16px;white-space:pre-wrap;}
+.event-highlight{color:var(--blue);font-weight:bold;}
+
+/* 选项 */
+.choices{display:flex;flex-direction:column;gap:10px;}
+.choice-btn{border:2px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;background:#fff;text-align:left;transition:all .2s;font-size:14px;line-height:1.5;}
+.choice-btn:hover{border-color:var(--blue-light);background:var(--blue-pale);transform:translateX(3px);}
+.choice-btn .choice-key{font-weight:bold;color:var(--blue);margin-right:8px;}
+.choice-btn .choice-hint{font-size:12px;color:var(--gray);margin-top:4px;}
+
+/* 结果反馈 */
+#result-area{display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:16px;margin-bottom:14px;}
+#result-area.fail{background:#fef2f2;border-color:#fca5a5;}
+#result-text{font-size:14px;line-height:1.7;white-space:pre-wrap;}
+.delta-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+.delta-badge{padding:3px 10px;border-radius:12px;font-size:12px;font-weight:bold;}
+.delta-pos{background:#dcfce7;color:#166534;}
+.delta-neg{background:#fee2e2;color:#991b1b;}
+#next-btn{display:none;width:100%;padding:12px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer;margin-top:10px;transition:background .2s;}
+#next-btn:hover{background:var(--blue-light);}
+
+/* 月末结算 */
+#screen-settlement{display:none;}
+.settlement-card{background:#fff;border-radius:14px;padding:28px;box-shadow:var(--shadow);}
+.settle-title{font-size:22px;font-weight:bold;color:var(--blue);text-align:center;margin-bottom:20px;}
+.settle-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px;}
+.settle-row:last-child{border-bottom:none;}
+.settle-label{color:var(--gray);}
+.settle-val{font-weight:bold;}
+.settle-val.pos{color:var(--green);}
+.settle-val.neg{color:var(--red);}
+.settle-warning{background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:12px;margin:14px 0;font-size:13px;color:#92400e;}
+
+/* 结局页 */
+#screen-ending{display:none;text-align:center;padding:40px 20px;}
+.ending-emoji{font-size:72px;margin-bottom:16px;}
+.ending-title{font-size:28px;font-weight:bold;color:var(--blue);margin-bottom:8px;}
+.ending-badge{display:inline-block;background:var(--blue-pale);color:var(--blue);border-radius:20px;padding:4px 16px;font-size:13px;margin-bottom:20px;}
+.ending-body{background:#fff;border-radius:14px;padding:24px;box-shadow:var(--shadow);font-size:15px;line-height:1.8;text-align:left;max-width:560px;margin:0 auto 24px;}
+.ending-stats{background:#f9fafb;border-radius:10px;padding:16px;max-width:560px;margin:0 auto 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center;}
+.es-item .es-label{font-size:12px;color:var(--gray);}
+.es-item .es-val{font-size:18px;font-weight:bold;color:var(--blue);}
+
+/* 通用按钮 */
+.btn-primary{display:inline-block;background:var(--blue);color:#fff;border:none;border-radius:10px;padding:13px 36px;font-size:16px;font-weight:bold;cursor:pointer;transition:background .2s;}
+.btn-primary:hover{background:var(--blue-light);}
+.btn-secondary{display:inline-block;background:#fff;color:var(--blue);border:2px solid var(--blue);border-radius:10px;padding:11px 28px;font-size:15px;font-weight:bold;cursor:pointer;margin-left:12px;transition:all .2s;}
+.btn-secondary:hover{background:var(--blue-pale);}
+
+/* 角色名输入 */
+.name-input{width:100%;padding:10px 14px;border:2px solid var(--border);border-radius:8px;font-size:15px;outline:none;transition:border .2s;}
+.name-input:focus{border-color:var(--blue-light);}
+
+/* 动画 */
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.fade-in{animation:fadeIn .35s ease forwards;opacity:1!important;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-4px);}75%{transform:translateX(4px);}}
+.shake{animation:shake .3s ease;}
+
+/* 进度条颜色动态 */
+.bar-danger{background:#dc2626 !important;}
+.bar-warn{background:#ca8a04 !important;}
+
+/* 响应式 */
+@media(max-width:600px){
+  .origin-grid{grid-template-columns:1fr;}
+  .trait-grid{grid-template-columns:1fr 1fr;}
+  .status-grid{grid-template-columns:repeat(3,1fr);}
+  .ending-stats{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<div id="topbar">
+  <div>
+    <div class="logo">🏢 幸福打工人</div>
+    <div class="subtitle">华夏幸福职场生存模拟器</div>
+  </div>
+  <div id="month-badge" style="display:none">第 <span id="month-num">1</span> 月</div>
+</div>
+
+<div id="app">
+
+<!-- ===== 封面 ===== -->
+<div id="screen-cover" class="fade-in">
+  <h1>幸福打工人</h1>
+  <p class="tagline">2020年·固安产业新城·职场生存模拟器</p>
+  <div class="cover-card">
+    <h3>📋 故事背景</h3>
+    <p>你通过了华夏幸福"常青藤计划"的层层筛选，成为了一名光荣的产业新城建设者。<br><br>
+    公司表面光鲜亮丽，内里暗流涌动——PPP项目回款开始延迟，传闻管理层在开会研究"流动性压力"，但对外依然高喊"成为全球产业新城引领者"。<br><br>
+    你需要在这复杂的职场中生存整整 <strong>12个月</strong>。</p>
+  </div>
+  <div class="cover-card">
+    <h3>🎮 游戏玩法</h3>
+    <p>• 创建你的角色（选出身、性格、分配能力点）<br>
+    • 每月面对3~5个职场事件，做出选择<br>
+    • 你的选择影响：领导好感、KPI、心理健康、存款……<br>
+    • 12个月后，触发不同结局（共12种）<br>
+    • 搞笑但真实，有时还有点扎心</p>
+  </div>
+  <button class="btn-primary" onclick="showCreate()">开始打工 →</button>
+</div>
+
+<!-- ===== 角色创建 ===== -->
+<div id="screen-create">
+  <div class="section-title">👤 角色创建</div>
+
+  <!-- 姓名 -->
+  <div class="card">
+    <div class="card-title">你叫什么名字？</div>
+    <input type="text" id="player-name" class="name-input" placeholder="输入你的名字（或花名）" maxlength="10" value="打工人小张">
+  </div>
+
+  <!-- 出身 -->
+  <div class="card">
+    <div class="card-title">选择你的出身（选1个）</div>
+    <div class="origin-grid" id="origin-grid"></div>
+  </div>
+
+  <!-- 性格 -->
+  <div class="card">
+    <div class="card-title">选择性格特质（选2个）</div>
+    <div class="trait-grid" id="trait-grid"></div>
+  </div>
+
+  <!-- 属性分配 -->
+  <div class="card">
+    <div class="card-title">分配能力点</div>
+    <div id="points-left">剩余点数：<span id="pts-num">0</span></div>
+    <div id="stat-rows"></div>
+  </div>
+
+  <!-- 部门选择 -->
+  <div class="card">
+    <div class="card-title">选择入职部门</div>
+    <div class="origin-grid" id="dept-grid"></div>
+  </div>
+
+  <div style="text-align:center;padding:10px 0 30px;">
+    <button class="btn-secondary" onclick="showCover()">← 返回</button>
+    <button class="btn-primary" onclick="startGame()">确认入职 →</button>
+  </div>
+</div>
+
+<!-- ===== 主游戏 ===== -->
+<div id="screen-game">
+  <!-- 状态面板 -->
+  <div id="status-panel">
+    <div class="status-grid" id="status-grid"></div>
+    <div id="money-display">💰 存款：<span id="money-num">5000</span> 元</div>
+  </div>
+
+  <!-- 内网新闻 -->
+  <div id="intranet-news">
+    <div class="news-title">📢 华夏幸福内网 · 本月要闻</div>
+    <div class="news-body" id="news-text"></div>
+  </div>
+
+  <!-- 事件区域 -->
+  <div id="event-area">
+    <div class="event-header">
+      <span class="event-tag" id="event-tag">事件</span>
+      <span class="event-title" id="event-title"></span>
+    </div>
+    <div class="event-body" id="event-body"></div>
+    <div class="choices" id="choices-area"></div>
+  </div>
+
+  <!-- 结果反馈 -->
+  <div id="result-area">
+    <div id="result-text"></div>
+    <div class="delta-row" id="delta-row"></div>
+    <button id="next-btn" onclick="nextEvent()">继续 →</button>
+  </div>
+</div>
+
+<!-- ===== 月末结算 ===== -->
+<div id="screen-settlement">
+  <div class="section-title">📊 月末结算</div>
+  <div class="settlement-card">
+    <div class="settle-title" id="settle-title"></div>
+    <div id="settle-rows"></div>
+    <div id="settle-warn"></div>
+    <div style="text-align:center;margin-top:20px;">
+      <button class="btn-primary" id="settle-next-btn">进入下个月 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 结局 ===== -->
+<div id="screen-ending">
+  <div class="ending-emoji" id="ending-emoji"></div>
+  <div class="ending-title" id="ending-title"></div>
+  <div class="ending-badge" id="ending-badge"></div>
+  <div class="ending-body" id="ending-body"></div>
+  <div class="ending-stats" id="ending-stats"></div>
+  <button class="btn-primary" onclick="restartGame()">🔄 重新打工</button>
+</div>
+
+</div><!-- end #app -->
+
+<script>
+// ========== 游戏数据 ==========
+
+const ORIGINS = [
+  {id:'985',name:'985理工直博',tag:'"卷王诞生"',
+   buff:'ability+3, health+2',debuff:'eq-2, looks-1',
+   stats:{ability:3,health:2,eq:-2,looks:-1},
+   skill:'【PPT炼金术】PPT制作成功率+20%',
+   passive:'social_anxiety'},
+  {id:'211',name:'211商科研究生',tag:'"普通打工人"',
+   buff:'eq+2, ability+1',debuff:'无',
+   stats:{eq:2,ability:1},
+   skill:'【见人说人话】社交事件有额外选项',
+   passive:''},
+  {id:'sea',name:'海归MBA',tag:'"海归废物"',
+   buff:'background+3, looks+1',debuff:'起始存款-8000, health-1',
+   stats:{background:3,looks:1,health:-1},
+   skill:'【英文震场】商务会议好感+15',
+   passive:'water_soil',extraMoney:-8000},
+  {id:'double',name:'双非本科应届',tag:'"黑马挑战者"',
+   buff:'每项属性均+1（共+6）',debuff:'晋升概率-15%',
+   stats:{ability:1,eq:1,looks:1,health:1,mental:1,background:1},
+   skill:'【不信命】每月可重置1次失败检定',
+   passive:'glass_ceiling',resetCount:1},
+  {id:'rich',name:'官二代/富二代',tag:'"关系户"',
+   buff:'background+5, 存款+30000',debuff:'ability-3, 张扬度初始+20',
+   stats:{background:5,ability:-3},
+   skill:'【一个电话】每季度可解决1个危机事件',
+   passive:'spotlight',extraMoney:30000,extraFlam:20}
+];
+
+const TRAITS = [
+  {id:'hardwork',name:'拼命三郎',sub:'加班不眨眼',
+   monthly:{ability:2,kpi:0.15,health:-3,mental:-2}},
+  {id:'social',name:'社交蝴蝶',sub:'走到哪聊到哪',
+   monthly:{peer_rel:0,anxiety:3},socialBonus:0.2},
+  {id:'slacker',name:'摸鱼达人',sub:'活在摸鱼边缘',
+   monthly:{mental:3,money:500,kpi:-0.2,boss_favor:-2}},
+  {id:'perfect',name:'完美主义',sub:'要么极致要么崩',
+   monthly:{anxiety:5},perfBonus:true},
+  {id:'honest',name:'老实人',sub:'从来不会说谎',
+   monthly:{loyalty:2},noLie:true},
+  {id:'self',name:'精致自保',sub:'把自己排第一',
+   monthly:{money:300,anxiety:-2,peer_rel:-1}}
+];
+
+const DEPTS = [
+  {id:'recruit',name:'🏗️ 产业招商部',desc:'谈业务·拼业绩·最秃',kpiType:'企业签约数'},
+  {id:'ops',name:'🏙️ 产业运营部',desc:'做活动·搞服务·谜之忙',kpiType:'园区活跃度'},
+  {id:'research',name:'📊 战略研究部',desc:'写报告·做PPT·最体面',kpiType:'报告产出量'},
+  {id:'gov',name:'🏛️ 政府事务部',desc:'打报告·等回复·跑关系',kpiType:'政策对接率'}
+];
+
+const STAT_DEFS = [
+  {key:'ability',label:'业务能力',desc:'招商谈判、方案撰写',color:'fill-blue'},
+  {key:'eq',label:'情商/社交',desc:'处理关系、哄领导',color:'fill-green'},
+  {key:'looks',label:'颜值/气场',desc:'外形管理、第一印象',color:'fill-purple'},
+  {key:'health',label:'体力/健康',desc:'身体素质、抗压能力',color:'fill-green'},
+  {key:'mental',label:'精神状态',desc:'心理健康、情绪管理',color:'fill-yellow'},
+  {key:'background',label:'背景/资源',desc:'家庭背景、人脉',color:'fill-orange'}
+];
+
+const STATUS_DEFS = [
+  {key:'boss_favor',label:'领导好感',color:'fill-blue'},
+  {key:'peer_rel',label:'同事关系',color:'fill-green'},
+  {key:'kpi',label:'KPI进度',color:'fill-orange'},
+  {key:'loyalty',label:'公司认同',color:'fill-purple'},
+  {key:'health_cur',label:'健康值',color:'fill-green'},
+  {key:'mental_cur',label:'精神值',color:'fill-yellow'},
+  {key:'anxiety',label:'焦虑值',color:'fill-red',invert:true}
+];
+
+const MONTHLY_NEWS = [
+  '公司荣获"中国最佳产业新城运营商"称号，领导在朋友圈转发了三遍。',
+  '集团战略会议召开，高层宣布"全面聚焦产业核心竞争力"，大家鼓掌很热烈。',
+  '固安产业园新签约企业2家，内网公告配了一张握手照片，背景是绿幕。',
+  '员工关爱月活动开始，HR发来问卷"请问您的工作满意度是多少"，满分10分。',
+  '公司提出新口号"服务即未来"，要求各部门将其纳入季度汇报PPT。',
+  '财务部通知：报销单请于月底前提交，逾期不予受理（第17次通知）。',
+  '某项目回款略有延迟，属于正常经营波动，请大家保持信心。',
+  '内网论坛有人发帖问"公司最近怎么了"，帖子已被管理员设为仅自己可见。',
+  '竞争对手又拿了一个大奖，领导说"我们要向先进经验学习"。',
+  '公司债券利率上调了一点点，财经频道专家说"影响不大请勿恐慌"。',
+  '年底冲刺！全员加油！各部门业绩目标请于本周三前确认！',
+  '感谢大家一年的努力，公司与你们共同成长。来年继续幸福！'
+];
+
+// ========== 游戏事件库 ==========
+const EVENTS = {
+  // 月份 -> 事件列表
+  1: [
+    {
+      id:'e001',tag:'入职第一天',title:'找不到工位',
+      body:`你手持入职通知，站在开放办公室门口。十几排工位，没有一个有你的名字。
+HR小姐姐说"你先跟着XX组坐"，XX组的人说"啊……我们这里好像没位置"。
+你在走廊站了20分钟，手里还提着装满资料的袋子。`,
+      choices:[
+        {text:'主动找前台据理力争，"我的工位在哪里？"',
+         hint:'考验业务能力检定',
+         check:{stat:'ability',diff:8},
+         onSuccess:{boss_favor:5,result:'前台翻了半天记录，终于给你安排了一个角落工位。领导听说后对你印象不错："这孩子不怂。"',deltas:{boss_favor:5}},
+         onFail:{loyalty:-5,anxiety:5,result:'前台说"登记系统还没更新，你先等等"——然后就没有然后了。你等了一个小时，被HR小姐姐记住了"这个爱催的新人"。',deltas:{loyalty:-5,anxiety:5}}},
+        {text:'找个空椅子坐下，打开电脑假装已经入职了',
+         hint:'无检定，随机心情',
+         direct:{peer_rel:3,mental:-2,result:'旁边的同事多看了你一眼，露出了心领神会的微笑。你们后来成了朋友。不过内心确实有点……绷不住。',deltas:{peer_rel:3,mental:-2}}},
+        {text:'站在走廊刷手机，等人来管你',
+         hint:'低风险但留下印象',
+         direct:{anxiety:5,result:'一个小时后HR路过，才想起"哦对还有个新人"。你获得了[透明人]称号。',deltas:{anxiety:5},flag:'invisible_1'}},
+        {text:'直接给面试你的部门经理发消息问',
+         hint:'考验情商检定',
+         check:{stat:'eq',diff:9},
+         onSuccess:{boss_favor:10,result:'部门经理回复"我来处理"，五分钟后你有了工位。他对你的第一印象是"有眼力见"。',deltas:{boss_favor:10}},
+         onFail:{boss_favor:-5,anxiety:8,result:'部门经理回复"工位安排是HR的事，你直接问他们"。你意识到自己越级了。',deltas:{boss_favor:-5,anxiety:8}}}
+      ]
+    },
+    {
+      id:'e002',tag:'第一周',title:'"帮我做个产业研究报告"',
+      body:`领导发来消息："你来做个固安县生物医药产业现状研究报告，下周一要。"
+没有模板。没有数据权限。没有任何提示。
+你打开电脑，对着空白PPT发了10分钟呆，然后决定……`,
+      choices:[
+        {text:'自力更生，百度+知网硬怼出来',
+         hint:'考验业务能力检定',
+         check:{stat:'ability',diff:9},
+         onSuccess:{ability:1,kpi:15,result:'"还可以。"领导说了两个字，然后开始改你的报告——用了三遍颜色高亮。但你能力提升了！',deltas:{ability:1,kpi:15}},
+         onFail:{anxiety:10,result:'"这个数据哪来的？"领导指着一个你从百度随手搜来的数据问。你支支吾吾，感觉全身都在出汗。',deltas:{anxiety:10}}},
+        {text:'找老员工张姐借旧报告模板',
+         hint:'考验同事关系',
+         check:{stat:'peer_rel',diff:45},
+         onSuccess:{peer_rel:5,kpi:20,result:'张姐给你翻出了一个2018年的旧模板。虽然有点过时，但架子在，你提前三天完成了任务。',deltas:{peer_rel:5,kpi:20}},
+         onFail:{health:-3,mental:-3,result:'张姐说"我也没有哎"，然后转身走了。你独自奋战到凌晨2点，咖啡喝了五杯。',deltas:{health:-3,mental:-3}}},
+        {text:'加班到凌晨4点，做出200页超级报告',
+         hint:'拼命但代价极大',
+         direct:{kpi:20,health:-5,mental:-3,peer_rel:3,result:'你把报告发出去的时候，窗外天已经蒙蒙亮。领导说"太详细了"，言下之意你没搞明白。同事说"这新人有点问题"。',deltas:{kpi:20,health:-5,mental:-3}}},
+        {text:'提交精简版15页，备注"数据权限待申请"',
+         hint:'保存精力，坦诚处理',
+         direct:{boss_favor:-5,mental:3,result:'领导说"你先了解了解再说"，语气有点敷衍。但你精神很好，还去和同事吃了顿饭。',deltas:{boss_favor:-5,mental:3}}}
+      ]
+    },
+    {
+      id:'e003',tag:'第一次部门会议',title:'领导突然点名问你',
+      body:`会议室里，领导突然扫了你一眼：
+"你是新来的吧，你说说，我们这个项目，你有什么想法？"
+在场所有人都看着你。包括那个你连名字都记不住的副总。
+你的大脑开始高速运转……`,
+      choices:[
+        {text:'清嗓子，认真说了三点意见，有理有据',
+         hint:'高风险高回报，考验业务能力',
+         check:{stat:'ability',diff:10},
+         onSuccess:{boss_favor:10,result:'领导点了点头："嗯，有点想法。"旁边的副总也看了你一眼。你感觉背后出了一身热汗，但赢了。',deltas:{boss_favor:10}},
+         onFail:{boss_favor:-3,anxiety:8,flamboyance:10,result:'"嗯……你先多了解了解再说。"沉默了三秒。你恨不得钻进椅子里。',deltas:{boss_favor:-3,anxiety:8,flamboyance:10}}},
+        {text:'"我刚来，还在学习，想多听听前辈们的经验"',
+         hint:'安全选项，但存在感低',
+         direct:{boss_favor:3,flamboyance:-5,result:'领导露出满意的微笑："很好，年轻人要谦虚。"你在心里翻了个白眼，但表面稳如老狗。',deltas:{boss_favor:3,flamboyance:-5}}},
+        {text:'说了一个大家已经讨论过的方向',
+         hint:'说错话，被同事嘲笑',
+         direct:{peer_rel:-5,anxiety:5,result:'小李在旁边轻轻笑了一声，没人提醒你"这个已经讨论过了"。会后小李路过你工位，表情意味深长。',deltas:{peer_rel:-5,anxiety:5}}},
+        {text:'直接说"我觉得这个项目有个战略问题——"然后硬讲了5分钟',
+         hint:'极高风险，需要高eq+ability',
+         checkDouble:{s1:'ability',s2:'eq',threshold:20},
+         onSuccess:{boss_favor:15,flamboyance:20,result:'领导停了下来，认真听你说完。副总说"这年轻人不错"。你成功出圈，但也成了所有人眼中的靶子。',deltas:{boss_favor:15,flamboyance:20}},
+         onFail:{boss_favor:-15,anxiety:15,flamboyance:20,result:'领导打断你："好了好了，先这样。"全场鸦雀无声。你度过了职场生涯迄今最长的10秒钟。',deltas:{boss_favor:-15,anxiety:15,flamboyance:20}}}
+      ]
+    }
+  ],
+  2: [
+    {
+      id:'e005',tag:'神秘邀约',title:'公司内网有人发私信约饭',
+      body:`你收到一条神秘私信，来自一个在公司工作了3年的大姐：
+"同学，我看你刚来，咱们聊聊？我认识不少资源，对你职场发展很有帮助……"
+约在公司楼下的咖啡馆，说"就闲聊闲聊"。`,
+      choices:[
+        {text:'"最近很忙，下次吧"，礼貌拒绝',
+         hint:'安全，但对方记仇',
+         direct:{peer_rel:-2,result:'对方回复了个"好的"，就没下文了。你后来在茶水间碰到她，她眼神有点奇怪。',deltas:{peer_rel:-2}}},
+        {text:'去了，发现是卖保险的，全程尴尬拒绝签单',
+         hint:'见世面，获得特殊经验',
+         direct:{mental:-3,result:'她讲了两小时的年金险和理财险，你全程保持礼貌微笑，最后说"我再想想"。回到工位，你获得了识别套路的能力。',deltas:{mental:-3},flag:'anti_scam'}},
+        {text:'去了，被洗脑了，买了一份年金险',
+         hint:'亏钱，但获得好感',
+         direct:{money:-3000,peer_rel:5,result:'你现在每年要多还3000块保费。但大姐从此对你特别好，会在关键时刻帮你说两句话。',deltas:{money:-3000,peer_rel:5},flag:'insurance_bought'}},
+        {text:'举报给HR，"有人在公司内部拉人头"',
+         hint:'忠于公司，但失去部分人心',
+         direct:{loyalty:5,peer_rel:-8,result:'HR说"好的我们了解一下"，然后没有然后。但你在某个小圈子里获得了"告密者"的称号。',deltas:{loyalty:5,peer_rel:-8}}}
+      ]
+    },
+    {
+      id:'e006',tag:'领导命令',title:'被临时拉去"充当背景板"',
+      body:`早上9点，你刚泡好咖啡，部门主任冲进来：
+"你！今天穿的还行，跟我去S1楼，上级领导要参观，需要人陪同！"
+你全程走在队伍最后面，领导偶尔回头看你一眼。
+你需要做点什么，还是……什么都不做？`,
+      choices:[
+        {text:'做好背景板，适时点头，安静专业',
+         hint:'低风险稳健选项',
+         direct:{boss_favor:5,anxiety:-3,result:'参观结束，领导对主任说"你们部门的年轻人挺稳"。你的背景板任务圆满完成。',deltas:{boss_favor:5,anxiety:-3}}},
+        {text:'主动介绍自己，"我是今年校招的，我负责……"',
+         hint:'考验情商，有风险',
+         check:{stat:'eq',diff:10},
+         onSuccess:{boss_favor:12,result:'高层领导对你点头微笑，说"好好干"。你直属领导事后悄悄说"有眼力见"。',deltas:{boss_favor:12}},
+         onFail:{boss_favor:-5,anxiety:8,result:'你直属领导事后把你叫到走廊说"你懂不懂规矩"。你默默点头，内心已经崩了。',deltas:{boss_favor:-5,anxiety:8}}},
+        {text:'全程拿小本子认真记录，写了三页笔记',
+         hint:'被同事取笑，但真的学到了东西',
+         direct:{ability:2,mental:2,result:'旁边的同事小声说"这人也太认真了"。你后来整理笔记，发现里面有一个关键信息，让你下个月少走了很多弯路。',deltas:{ability:2,mental:2}}},
+        {text:'因为没吃早饭，参观途中胃发出了声音',
+         hint:'随机尴尬事件',
+         direct:{anxiety:15,peer_rel:5,result:'领导回头看了你一眼，什么都没说。旁边的同事差点没憋住笑。你在这次参观中留下了传说级的印象。',deltas:{anxiety:15,peer_rel:5}}}
+      ]
+    }
+  ],
+  3: [
+    {
+      id:'e007',tag:'试用期考核',title:'月底KPI只完成了35%',
+      body:`月底只剩5天。你的KPI只完成了35%。
+领导在晨会上说："大家冲一冲，月底目标！"
+眼神扫过你的时候停了一秒钟。
+就一秒钟，但你感受到了宇宙级别的压力。`,
+      choices:[
+        {text:'连续加班3天到11点，强行推进',
+         hint:'考验业务能力，代价是健康',
+         check:{stat:'ability',diff:8},
+         onSuccess:{kpi:25,health:-5,mental:-3,result:'你熬了三个大夜，终于把KPI推到60%。领导在月末会议上点名表扬了你，虽然你当时眼睛都睁不开。',deltas:{kpi:25,health:-5,mental:-3}},
+         onFail:{kpi:10,health:-8,mental:-5,result:'加班加班加班，结果只推到45%。你的健康值已经亮起了红灯，但KPI还是没达标。',deltas:{kpi:10,health:-8,mental:-5}}},
+        {text:'去找同事小李取经，请他吃了顿饭',
+         hint:'花钱买经验，可能有副作用',
+         direct:{peer_rel:8,kpi:15,money:-150,result:'小李告诉你一个"数字包装"的技巧。你把"初步接触"写成了"深度洽谈"，把"有意向"写成了"实质推进"。领导看了说"不错不错"。',deltas:{peer_rel:8,kpi:15,money:-150},flag:'data_inflate'}},
+        {text:'在报告里把"框架意向书"包装成"正式签约在谈"',
+         hint:'数字注水，有后患',
+         direct:{kpi:20,result:'看起来完成得不错。但这个flag会在未来某月触发"数据核查"事件。',deltas:{kpi:20},flag:'data_inflate'}},
+        {text:'找到一家愿意配合的企业，签了一份象征性框架协议',
+         hint:'考验情商，有成功和失败两种结果',
+         check:{stat:'eq',diff:9},
+         onSuccess:{kpi:20,boss_favor:5,result:'你用一顿饭+一份不具法律约束力的框架协议，把KPI堆到了55%。领导说"这孩子有办法"。',deltas:{kpi:20,boss_favor:5}},
+         onFail:{anxiety:15,result:'企业老板答应了，结果对方临时反悔，说"我们再考虑考虑"。你的月底KPI还是35%，但付了顿饭钱。',deltas:{anxiety:15,money:-200}}}
+      ]
+    }
+  ],
+  4: [
+    {
+      id:'e008',tag:'公司活动',title:'员工创意大赛来了',
+      body:`内网通知：第三届"幸福创想"员工创意大赛开始报名！
+奖金：一等奖8000元，二等奖5000元，三等奖一套华夏幸福定制文具。
+据说奖品是这种……每个字母都烫了金的黑色钢笔。`,
+      choices:[
+        {text:'认真提交一份有实质内容的创意方案',
+         hint:'考验业务能力',
+         check:{stat:'ability',diff:11},
+         onSuccess:{money:5000,boss_favor:10,result:'你拿了二等奖，5000元奖金。领导在全员会上提到了你的名字，你瞬间成为了部门"明日之星"。',deltas:{money:5000,boss_favor:10}},
+         onFail:{anxiety:5,result:'连三等奖都没拿到。定制文具给了隔壁部门的人。你在会上鼓了很久的掌。',deltas:{anxiety:5}}},
+        {text:'随便提交一个，走个流程',
+         hint:'无风险，无收益',
+         direct:{result:'你的方案排在倒数第二。小李的方案获得了一等奖。他的方案……和你的思路差不多，但PPT做得好看了五十倍。',deltas:{}}},
+        {text:'拉上同事组队参赛',
+         hint:'花时间建立关系',
+         direct:{peer_rel:10,money:200,result:'你们组获得了三等奖。组长代表领奖，拿走了钢笔。你分到了一个华夏幸福的马克杯，上面印着"幸福工作，幸福生活"。',deltas:{peer_rel:10,money:200}}},
+        {text:'不参加，专心做本职工作',
+         hint:'被领导隐晦批评',
+         direct:{boss_favor:-3,kpi:10,result:'"参与度"在月度评价表里是负的，但你的业务推进明显快了。鱼和熊掌……',deltas:{boss_favor:-3,kpi:10}}}
+      ]
+    },
+    {
+      id:'e009',tag:'关键项目',title:'大客户谈判里的复杂角色',
+      body:`某生物科技公司赵总，疑似有落地意向，但要求：
+1. 和你们领导直接见面
+2. 公司帮"安排一下"某个快审手续  
+3. 晚上要一起"商务宴请"
+
+赵总发来微信："小伙子，做事要灵活嘛。"`,
+      choices:[
+        {text:'如实反馈，按程序对接领导，走正规流程',
+         hint:'稳健但进度慢',
+         direct:{ability:2,kpi:5,result:'赵总觉得你"不灵活"，进度慢了一个月。但流程没出问题，领导对你的合规意识给了好评。',deltas:{ability:2,kpi:5}}},
+        {text:'帮赵总向领导申请特殊通道，自己居中协调',
+         hint:'考验情商，有越权风险',
+         check:{stat:'eq',diff:11},
+         onSuccess:{boss_favor:8,kpi:20,result:'你成功协调了一个"绿色通道"。赵总很满意，领导说"这孩子会办事"。项目有了实质进展。',deltas:{boss_favor:8,kpi:20}},
+         onFail:{boss_favor:-10,anxiety:10,result:'领导发现你越过他直接协调资源，把你叫去谈了15分钟话。你全程低着头。',deltas:{boss_favor:-10,anxiety:10}}},
+        {text:'去了商务宴请，喝了酒',
+         hint:'随机触发，可能说漏嘴',
+         random:true,
+         opt1:{prob:0.5,result:'喝到第三杯，你不小心提到了公司给其他企业的优惠政策底线。赵总笑了笑，下次谈判你就感受到了代价。',deltas:{kpi:-10,boss_favor:-5,anxiety:10}},
+         opt2:{prob:0.5,result:'你和赵总喝到了尽兴，他说"小伙子够意思"，当场拍板意向合作。你打了个车回家，第二天头疼欲裂但心情很好。',deltas:{kpi:30,peer_rel:5}}},
+        {text:'婉拒宴请，"我不方便喝酒，只参加正式会议"',
+         hint:'稳健，但失去部分好感',
+         direct:{kpi:10,result:'赵总对你的评价是"太死板"。项目进展慢，但你保持了底线。',deltas:{kpi:10},flag:'integrity'}}
+      ]
+    }
+  ],
+  5: [
+    {
+      id:'e010',tag:'内部消息',title:'晋升内推名单流传',
+      body:`有人在茶水间悄悄告诉你，下个季度晋升有个内推机会，名额3个，但候选是提前定好的。
+同事小李已经在名单里了。
+你呢？`,
+      choices:[
+        {text:'主动找领导谈，表达晋升意愿',
+         hint:'考验领导好感度',
+         check:{stat:'boss_favor',diff:60,isStatus:true},
+         onSuccess:{boss_favor:5,result:'"你再努力努力，这次……也许可以考虑一下。"领导话说得模糊，但你被列为第4个候选。',deltas:{boss_favor:5}},
+         onFail:{anxiety:8,result:'"你来的时间还短，再沉淀一下。"你从他的表情里读出了"这次没你"。',deltas:{anxiety:8}}},
+        {text:'让张姐帮你说两句话',
+         hint:'需要较高同事关系',
+         check:{stat:'peer_rel',diff:70,isStatus:true},
+         onSuccess:{boss_favor:8,result:'张姐跟领导聊了几句，领导对你的印象好了一些。名单上多了你的名字（虽然是最后一个）。',deltas:{boss_favor:8}},
+         onFail:{result:'张姐说"这种事我不好说"，婉拒了。你们之间没有尴尬，但也没有结果。',deltas:{}}},
+        {text:'拉拢小李，"你帮我说话，我帮你"',
+         hint:'建立同盟，有反水风险',
+         direct:{peer_rel:10,result:'小李告诉了你名单的细节，但在关键时刻，他依然选择了保全自己。你们的友谊……有了一个裂缝。',deltas:{peer_rel:10},flag:'li_alliance'}},
+        {text:'无视，专心做业绩，用数据说话',
+         hint:'考验KPI',
+         check:{stat:'kpi',diff:75,isStatus:true},
+         onSuccess:{result:'你的数字自己说了话。名单上突然多了你。',deltas:{kpi:5}},
+         onFail:{ability:2,result:'你没进名单，但这段时间业务能力提升不少。下次吧。',deltas:{ability:2}}}
+      ]
+    }
+  ],
+  6: [
+    {
+      id:'e011',tag:'全员大会',title:'高管宣布"转型战略"',
+      body:`全员大会上，高管用激昂的语气介绍：
+"我们要全面转型为'产业新城服务商'！"
+PPT上写着令人血脉偾张的宏伟目标。
+会后，你在电梯里听见两个资深员工低声说：
+"上次也这么说的……那是三年前。"`,
+      choices:[
+        {text:'认真做笔记，研究新战略如何影响自己工作',
+         hint:'提升战略嗅觉',
+         direct:{ability:1,loyalty:5,result:'你把战略要点整理成一页纸，发给了领导。领导回复"不错"，还转发给了同事。',deltas:{ability:1,loyalty:5},flag:'strategy_sense'}},
+        {text:'熟练鼓掌，礼节性表示"很振奋"，该干啥干啥',
+         hint:'标准打工人操作',
+         direct:{result:'你面带微笑地鼓完了掌，回到工位继续推进手上的项目。没有什么改变。',deltas:{}}},
+        {text:'在内部论坛发帖"请问这次和三年前的转型有何本质区别？"',
+         hint:'高风险，获得人气但有后果',
+         direct:{boss_favor:-8,peer_rel:10,result:'帖子收到了20个点赞和3个私信感谢，然后被设为仅自己可见。你发现了公司内网的边界。',deltas:{boss_favor:-8,peer_rel:10}}},
+        {text:'回家查了财报和债务，在日记里写下"准备后路"',
+         hint:'清醒但会降低公司认同感',
+         direct:{loyalty:-10,anxiety:-5,result:'数字不会骗人。你看到了一些让你皱眉的东西。你没有告诉任何人，但你打开了招聘网站。',deltas:{loyalty:-10,anxiety:-5},flag:'clearheaded'}}
+      ]
+    }
+  ],
+  7: [
+    {
+      id:'e012',tag:'裁员谣言',title:'"优化名单"在内网流传',
+      body:`茶水间的对话突然停止——因为你走进来了。
+下午，一个你不认识的人给你发了一条私信：
+"我有一份名单，你想知道你在不在上面吗？
+需要……请我吃顿饭。"`,
+      choices:[
+        {text:'拒绝，"谢了，这种事不靠谱"',
+         hint:'安全，但不确定性折磨你',
+         direct:{anxiety:5,result:'你拒绝了。接下来的一周，你见到所有人都要猜"他/她是不是也在名单里"。',deltas:{anxiety:5}}},
+        {text:'请他吃饭，看了名单，发现自己不在里面',
+         hint:'花钱消焦虑，名单可能是假的',
+         direct:{money:-200,anxiety:-10,result:'名单上没有你的名字。你松了口气，回去之后发现名单可能根本是伪造的。但你睡了一个好觉。',deltas:{money:-200,anxiety:-10}}},
+        {text:'把这件事汇报给HR',
+         hint:'忠诚但破坏气氛',
+         direct:{loyalty:5,boss_favor:3,peer_rel:-15,result:'HR核查了一下，找到了那个人。整个部门气氛变得非常微妙，有人开始叫你"线人"。',deltas:{loyalty:5,boss_favor:3,peer_rel:-15}}},
+        {text:'自己分析各种信号，理性判断',
+         hint:'考验业务能力',
+         check:{stat:'ability',diff:10},
+         onSuccess:{anxiety:-5,result:'你综合了KPI排名、最近的领导态度和部门预算，得出一个合理判断：你应该是安全的。',deltas:{anxiety:-5}},
+         onFail:{anxiety:15,result:'你越分析越焦虑，得出了三个不同的结论，每一个都指向不好的方向。',deltas:{anxiety:15}}}
+      ]
+    },
+    {
+      id:'e013',tag:'领导请假',title:'代理领导完全不认识你',
+      body:`王大总突然"因私事"请假，代理领导是从另一个城市过来的陈总监。
+陈总监第一天就问："XX项目进展怎么样？"
+你发现……这个项目一直是王大总在推的，你对细节一无所知。`,
+      choices:[
+        {text:'临时补课，快速了解项目，强行对接',
+         hint:'考验业务能力',
+         check:{stat:'ability',diff:11},
+         onSuccess:{boss_favor:10,result:'你用一个下午消化了所有材料，给陈总监做了一个不算完美但可圈可点的汇报。他说"这年轻人行"。',deltas:{boss_favor:10}},
+         onFail:{boss_favor:-8,anxiety:8,result:'你磕磕巴巴，暴露了信息空白。陈总监皱了皱眉，没有说什么，但那表情你懂。',deltas:{boss_favor:-8,anxiety:8}}},
+        {text:'联系王大总，远程请示怎么办',
+         hint:'稳健，但显示不独立',
+         direct:{loyalty:3,result:'王大总远程指导了你，陈总监觉得你"不够独立"。不好不坏。',deltas:{loyalty:3}}},
+        {text:'找张姐了解项目背景，然后整理完整汇报',
+         hint:'借助人脉，需要好关系',
+         check:{stat:'peer_rel',diff:60,isStatus:true},
+         onSuccess:{peer_rel:8,boss_favor:12,result:'张姐给你补了课，你整理出了一份完整汇报。陈总监对你刮目相看。',deltas:{peer_rel:8,boss_favor:12}},
+         onFail:{result:'张姐说"这我也不太清楚"。你只好硬着头皮上了。',deltas:{anxiety:5}}},
+        {text:'如实说"这个项目我不太了解，需要王总回来汇报"',
+         hint:'诚实，有代价',
+         direct:{boss_favor:-5,result:'陈总监对你印象不深，但你至少没有出错。',deltas:{boss_favor:-5},flag:'integrity'}}
+      ]
+    }
+  ],
+  8: [
+    {
+      id:'e014',tag:'猎头来电',title:'竞争对手出价高25%',
+      body:`"您好，我是XX猎头公司，您目前的背景非常吻合我们一家头部产业地产的需求。
+薪酬是目前的125%，另有签字费……"
+你捏着手机，站在公司楼梯间。`,
+      choices:[
+        {text:'"谢谢，我目前没有考虑"，礼貌拒绝',
+         hint:'忠诚，但也许错过机会',
+         direct:{loyalty:5,anxiety:0,result:'你挂掉电话，但那个"125%"的数字在脑子里绕了两天。',deltas:{loyalty:5},flag:'offer_seen'}},
+        {text:'先了解一下，约了对方面聊，但没去',
+         hint:'心理安慰，降低焦虑',
+         direct:{loyalty:-5,anxiety:-5,result:'你们在电话里聊了半小时，知道了市场上有人认可你的价值。这本身就是一种稳定剂。',deltas:{loyalty:-5,anxiety:-5},flag:'offer_seen'}},
+        {text:'认真推进，拿到offer，回来和公司谈涨薪',
+         hint:'高风险高回报',
+         check:{stat:'boss_favor',diff:60,isStatus:true},
+         onSuccess:{money:1000,result:'每月工资涨了1000。领导说"好，那你留下来"。但他眼神里多了一些东西。',deltas:{money:1000,loyalty:-8},flag:'got_raise'},
+         onFail:{loyalty:-10,boss_favor:-8,result:'领导说"那你自己考虑清楚"。你感觉到了冷意，然后什么也没变。',deltas:{loyalty:-10,boss_favor:-8}}},
+        {text:'认真推进offer，准备离职',
+         hint:'开启离职路线',
+         direct:{result:'你决定好了。接下来的日子你开始悄悄处理交接事宜。',deltas:{loyalty:-30},flag:'resign_track'}}
+      ]
+    }
+  ],
+  9: [
+    {
+      id:'e015',tag:'节日福利',title:'中秋月饼缩水了',
+      body:`往年是双黄莲蓉礼盒+购物卡。今年是：一盒普通月饼，附一张手写贺卡。
+食堂阿姨悄悄说："上个月有一批外包人员没发工资，你们发了算好的了。"
+你拿着月饼，愣了三秒钟。`,
+      choices:[
+        {text:'当没听见，感谢公司心意，在内网晒月饼',
+         hint:'心理防御机制',
+         direct:{loyalty:3,anxiety:-2,result:'你配了一句"幸福满满"发上去，收获了8个赞，其中3个是HR。',deltas:{loyalty:3,anxiety:-2}}},
+        {text:'认真核对了自己工资，没问题，松了口气',
+         hint:'理性应对',
+         direct:{anxiety:-3,result:'工资是全额到账的。你不知道该庆幸还是该感谢。',deltas:{anxiety:-3}}},
+        {text:'去HR那里旁敲侧击打听公司财务状况',
+         hint:'考验情商',
+         check:{stat:'eq',diff:10},
+         onSuccess:{anxiety:5,result:'HR说了很多什么都没说的话，但你从中提取到了关键信息：Q3某些项目的回款的确延迟了。',deltas:{anxiety:5},flag:'clearheaded'}},
+         onFail:{anxiety:10,result:'HR微笑着说"公司很好，不要相信谣言"。你出了HR办公室，焦虑值+10。',deltas:{anxiety:10}}},
+        {text:'打开招聘网站，更新了简历',
+         hint:'为自己留后路',
+         direct:{loyalty:-10,anxiety:-10,result:'你更新了简历，投了三个职位。不一定要走，但有选择，就没那么慌了。',deltas:{loyalty:-10,anxiety:-10},flag:'clearheaded'}}
+      ]
+    }
+  ],
+  10: [
+    {
+      id:'e016',tag:'危机时刻',title:'大调整来了，名单在走程序',
+      body:`11月初，行政通知：所有员工须重新填写岗位评估表。
+部门氛围凝固。
+有人开始用个人邮箱发送工作文件，有人每天中午神秘消失1小时。
+你感受到了什么叫"山雨欲来"。`,
+      choices:[
+        {text:'假装什么都没发生，专注工作',
+         hint:'KPI决定命运',
+         check:{stat:'kpi',diff:65,isStatus:true},
+         onSuccess:{result:'你的业绩单护住了你。名单没有你。',deltas:{boss_favor:5}},
+         onFail:{result:'名单里有你的名字。领导叫你进了小会议室……',deltas:{boss_favor:-20,loyalty:-20},flag:'fired_risk'}},
+        {text:'主动和领导沟通，表达"核心价值"',
+         hint:'考验领导好感',
+         check:{stat:'boss_favor',diff:65,isStatus:true},
+         onSuccess:{result:'领导说"你放心，你在保留名单里"。你出来的时候腿有点软。',deltas:{boss_favor:5,anxiety:-10}},
+         onFail:{anxiety:15,result:'领导说"公司正在调整，我们都要配合"。这句话……你听懂了。',deltas:{anxiety:15,boss_favor:-5}}},
+        {text:'打听自己的位置，启动人脉',
+         hint:'考验背景资源',
+         check:{stat:'background',diff:8},
+         onSuccess:{anxiety:-10,result:'你通过一个关系提前知道了自己在安全区。接下来两周，你是部门里最淡定的人。',deltas:{anxiety:-10}},
+         onFail:{anxiety:20,result:'消息有误，你以为自己安全，结果……',deltas:{anxiety:20}}},
+        {text:'已经有offer，主动提离职，体面离开',
+         hint:'需要有offer旗帜',
+         needFlag:'offer_seen',
+         direct:{result:'你提交了离职申请。走的时候，同事们来送你。领导握了握你的手，说"好好干"。',deltas:{loyalty:10},flag:'resigned_gracefully'}}
+      ]
+    }
+  ],
+  11: [
+    {
+      id:'e017',tag:'公司要求',title:'公司邀请员工认购内部基金',
+      body:`一封邮件来自人力资源：
+"公司面临阶段性流动性挑战，现推出员工自愿参与的产业基金计划，年化预期收益8%……"
+有同事发来私信："你不买的话，可能会被列为不认同公司的人……"`,
+      choices:[
+        {text:'拒绝购买，这不在劳动合同范围内',
+         hint:'保住钱，但得罪公司',
+         direct:{loyalty:-15,result:'你没买。没有人直接说什么，但你发现自己开始被排除在某些会议之外。',deltas:{loyalty:-15},flag:'integrity'}},
+        {text:'象征性买了5000元',
+         hint:'花小钱维关系',
+         direct:{boss_favor:5,money:-5000,result:'领导在名单上看到你的名字，点了点头。5000块……就当交了个保护费。',deltas:{boss_favor:5,money:-5000}}},
+        {text:'豪气买了5万元',
+         hint:'高风险，可能血本无归',
+         direct:{boss_favor:15,loyalty:10,money:-50000,result:'领导专门给你发了条微信"谢谢信任"。这50000块现在的命运……你会在结局里知道。',deltas:{boss_favor:15,loyalty:10,money:-50000},flag:'fund_bought_big'}},
+        {text:'找法律渠道确认是否违法，书面回复HR',
+         hint:'开启维权路线',
+         direct:{boss_favor:-20,loyalty:-20,result:'你收到了一份措辞礼貌但含义明确的"绩效谈话"通知。但你手里有邮件记录。',deltas:{boss_favor:-20,loyalty:-20},flag:'labor_rights'}}
+      ]
+    }
+  ],
+  12: [
+    {
+      id:'e018',tag:'年终考核',title:'与领导一对一的"谈话"',
+      body:`领导把你叫进小会议室：
+"这一年你表现……还可以。说说你的想法，明年你想怎么发展？"
+你看到他桌上有一份倒扣的文件，隐约看到"人员调整方案"几个字。`,
+      choices:[
+        {text:'正常汇报，表达留任意愿，争取调薪',
+         hint:'综合检定决定结果',
+         checkDouble:{s1:'boss_favor',s2:'kpi',threshold:120,isStatus:true},
+         onSuccess:{money:2000,result:'领导说"薪酬方面可以调整一下"。你走出会议室，感觉到了一年辛苦的价值。',deltas:{money:2000,boss_favor:5}},
+         onFail:{result:'领导说"明年继续努力"。薪酬没动，但你还在。',deltas:{}}},
+        {text:'直接问那份倒扣的文件',
+         hint:'考验情商，极高风险',
+         check:{stat:'eq',diff:12},
+         onSuccess:{boss_favor:15,result:'"你很敏锐。"领导翻过来让你看了一眼，然后说"你不在里面"。你们之间的关系，升华了。',deltas:{boss_favor:15,anxiety:-10}},
+         onFail:{boss_favor:-10,result:'领导沉默了三秒钟，说"没什么"，然后把文件收进了抽屉。气氛骤降十度。',deltas:{boss_favor:-10,anxiety:10}}},
+        {text:'"我已经有其他发展机会在考虑"作为筹码',
+         hint:'高压谈判，考验好感度',
+         check:{stat:'boss_favor',diff:70,isStatus:true},
+         onSuccess:{money:3000,result:'领导说"好，我们来谈谈留下来的条件"。你最终得到了一个满意的offer。',deltas:{money:3000,loyalty:-5}},
+         onFail:{result:'领导说"那你自己好好考虑吧"。下周一，HR发来了"离职流程"模板。',deltas:{loyalty:-30,boss_favor:-15},flag:'resign_track'}},
+        {text:'提出对公司未来的建议，展现视野',
+         hint:'考验业务能力',
+         check:{stat:'ability',diff:12},
+         onSuccess:{boss_favor:15,result:'领导认真听完，说"这个角度很好"，当场把你的建议发给了两位副总。你感觉到了真正被看见的感觉。',deltas:{boss_favor:15,loyalty:5}},
+         onFail:{boss_favor:-3,result:'"你还嫩了点。"就这五个字，你用了三天才从中走出来。',deltas:{boss_favor:-3,anxiety:8}}}
+      ]
+    }
+  ]
+};
+
+// 随机事件池
+const RANDOM_EVENTS = [
+  {
+    id:'r1',tag:'随机事件',title:'领导让你去"研究打印机"',
+    body:`"你去把那个打印机研究一下，办公室的人都用不好。"
+你花了40分钟成功修好了卡纸。
+然后发现这台打印机根本没有通网，打不了。`,
+    choices:[
+      {text:'认真研究，把使用教程贴在了机器上',
+       direct:{ability:1,peer_rel:5,mental:-2,result:'同事们都很感谢你。但这40分钟永远消失在了宇宙中。',deltas:{ability:1,peer_rel:5,mental:-2}}},
+      {text:'"这台机器没联网，打不了"，直接汇报领导',
+       direct:{boss_favor:3,result:'"哦？"领导说。然后沉默了5秒，说"哦那算了"。',deltas:{boss_favor:3}}}
+    ]
+  },
+  {
+    id:'r2',tag:'随机事件',title:'"随便做做"的PPT改了17版',
+    body:`领导说："你做个PPT，就是参考一下，随便做做。"
+你改了17版。
+领导看了第1版说"行"，然后再也没提起这个PPT。`,
+    choices:[
+      {text:'接受这个现实，删掉其他16版',
+       direct:{kpi:5,mental:-5,result:'你获得了[PPT孤儿]成就。那17版里有三版是你最满意的作品。',deltas:{kpi:5,mental:-5}}},
+      {text:'把最好的那版发到公司邮件列表分享',
+       direct:{peer_rel:8,boss_favor:-3,result:'收到了7个"学习了"的回复，领导觉得你"爱显摆"。',deltas:{peer_rel:8,boss_favor:-3}}}
+    ]
+  },
+  {
+    id:'r3',tag:'随机事件',title:'公司团建去打真人CS',
+    body:`你和财务部的小妹一组，她全程躲在掩体后面玩手机。
+你一个人扛着全组，打出了3:1的战绩。
+但没有人知道是你的功劳，因为你们输了总分。`,
+    choices:[
+      {text:'享受过程，"至少我赢了局部战役"',
+       direct:{mental:10,peer_rel:5,result:'你笑着喝了一杯饮料，感觉比工作日快乐多了。这就够了。',deltas:{mental:10,peer_rel:5}}},
+      {text:'发朋友圈"今天为团队拼尽全力"',
+       direct:{flamboyance:5,mental:8,result:'收到了12个赞，其中有领导。张扬度小幅上升。',deltas:{flamboyance:5,mental:8}}}
+    ]
+  },
+  {
+    id:'r4',tag:'随机事件',title:'公司邮件被监控了',
+    body:`IT部门通知：请大家合规使用公司系统资源。
+同一天，一个同事发现他发给朋友的"领导是蠢货"的邮件，被自动转发给了HR。
+整个办公室的人开始用个人手机发消息。`,
+    choices:[
+      {text:'从此只用微信，不用公司邮件发私事',
+       direct:{anxiety:-5,result:'你成功规避了风险，但每天切换设备很累。',deltas:{anxiety:-5}}},
+      {text:'什么也没改变，"我从来不说坏话"',
+       direct:{loyalty:5,result:'你坦荡荡的，但偶尔会担心一下。',deltas:{loyalty:5}}}
+    ]
+  },
+  {
+    id:'r5',tag:'随机事件',title:'年会要求表演节目',
+    body:`"我们部门今年要出个节目，你来主持吧？你看起来比较……外向？"
+你不知道谁给他们这个印象的。`,
+    choices:[
+      {text:'接受，认真准备，发挥正常',
+       direct:{eq:2,flamboyance:10,mental:5,result:'你主持了整场，效果不错。领导说"没想到"。你也没想到。',deltas:{eq:2,flamboyance:10,mental:5}}},
+      {text:'接受，但当场忘词，全程尴尬',
+       direct:{mental:-10,ability:3,result:'那三秒的沉默你会记一辈子。但你在羞耻中成长了，下个月特别拼。',deltas:{mental:-10,ability:3}}},
+      {text:'拒绝，"我不擅长这个"',
+       direct:{peer_rel:-3,anxiety:-5,result:'"哦……那算了。"你逃过了一劫，也少了一份快乐。',deltas:{peer_rel:-3,anxiety:-5}}}
+    ]
+  }
+];
+
+// ========== 游戏状态 ==========
+let player = {};
+let currentScreen = 'cover';
+let currentEvents = [];
+let currentEventIndex = 0;
+let pendingDelta = null;
+
+// ========== 初始化 ==========
+let _initialized = false;
+function initCreateScreen() {
+  // 只在首次渲染，之后不再重复生成DOM
+  const og = document.getElementById('origin-grid');
+  if (og.innerHTML.trim() === '') {
+    og.innerHTML = ORIGINS.map(o => `
+      <div class="origin-btn" onclick="selectOrigin('${o.id}')" id="ob-${o.id}">
+        <div class="ob-name">${o.name}</div>
+        <div class="ob-tag">${o.tag}</div>
+        <div class="ob-buff">✅ ${o.buff}</div>
+        <div class="ob-debuff">${o.debuff !== '无' ? '❌ ' + o.debuff : ''}</div>
+        <div style="font-size:11px;color:#6b7280;margin-top:4px;">🔮 ${o.skill}</div>
+      </div>
+    `).join('');
+  }
+
+  const tg = document.getElementById('trait-grid');
+  if (tg.innerHTML.trim() === '') {
+    tg.innerHTML = TRAITS.map(t => `
+      <div class="trait-btn" onclick="selectTrait('${t.id}')" id="tb-${t.id}">
+        <div class="tb-name">${t.name}</div>
+        <div class="tb-sub">${t.sub}</div>
+      </div>
+    `).join('');
+  }
+
+  const dg = document.getElementById('dept-grid');
+  if (dg.innerHTML.trim() === '') {
+    dg.innerHTML = DEPTS.map(d => `
+      <div class="origin-btn" onclick="selectDept('${d.id}')" id="db-${d.id}">
+        <div class="ob-name">${d.name}</div>
+        <div class="ob-tag">${d.desc}</div>
+        <div style="font-size:11px;color:#6b7280;margin-top:4px;">📈 KPI: ${d.kpiType}</div>
+      </div>
+    `).join('');
+  }
+
+  const sr = document.getElementById('stat-rows');
+  if (sr.innerHTML.trim() === '') {
+    renderStatRows();
+  }
+
+  // 默认选第一个
+  if (!selectedOrigin) selectOrigin('211');
+  if (!selectedDept) selectDept('recruit');
+}
+
+let selectedOrigin = null;
+let selectedTraits = [];
+let selectedDept = 'recruit';
+let baseStats = {ability:6,eq:6,looks:6,health:6,mental:6,background:6};
+let freePoints = 6; // 额外可分配
+
+function selectOrigin(id) {
+  selectedOrigin = id;
+  document.querySelectorAll('.origin-btn[id^="ob-"]').forEach(el => el.classList.remove('selected'));
+  document.getElementById('ob-'+id).classList.add('selected');
+  updateStatRows();
+}
+
+function selectTrait(id) {
+  const idx = selectedTraits.indexOf(id);
+  if (idx >= 0) {
+    selectedTraits.splice(idx, 1);
+    document.getElementById('tb-'+id).classList.remove('selected');
+  } else {
+    if (selectedTraits.length >= 2) {
+      const removed = selectedTraits.shift();
+      document.getElementById('tb-'+removed).classList.remove('selected');
+    }
+    selectedTraits.push(id);
+    document.getElementById('tb-'+id).classList.add('selected');
+  }
+}
+
+function selectDept(id) {
+  selectedDept = id;
+  document.querySelectorAll('.origin-btn[id^="db-"]').forEach(el => el.classList.remove('selected'));
+  document.getElementById('db-'+id).classList.add('selected');
+}
+
+function renderStatRows() {
+  const container = document.getElementById('stat-rows');
+  container.innerHTML = STAT_DEFS.map(s => `
+    <div class="stat-row">
+      <div class="stat-label">${s.label}</div>
+      <div class="stat-desc">${s.desc}</div>
+      <div class="stat-controls">
+        <button class="stat-btn" onclick="adjustStat('${s.key}',-1)">−</button>
+        <div class="stat-val" id="sv-${s.key}">${baseStats[s.key]}</div>
+        <button class="stat-btn" onclick="adjustStat('${s.key}',+1)">+</button>
+      </div>
+      <div class="stat-bar-wrap">
+        <div class="stat-bar" id="sb-${s.key}" style="width:${baseStats[s.key]/15*100}%"></div>
+      </div>
+    </div>
+  `).join('');
+  updatePoints();
+}
+
+function updateStatRows() {
+  STAT_DEFS.forEach(s => {
+    const el = document.getElementById('sv-'+s.key);
+    const bar = document.getElementById('sb-'+s.key);
+    if (el) {
+      const finalVal = getFinalStat(s.key);
+      el.textContent = finalVal;
+      if (bar) bar.style.width = Math.min(finalVal,15)/15*100 + '%';
+    }
+  });
+  updatePoints();
+}
+
+function getFinalStat(key) {
+  let val = baseStats[key];
+  if (selectedOrigin) {
+    const o = ORIGINS.find(x=>x.id===selectedOrigin);
+    if (o && o.stats[key]) val += o.stats[key];
+  }
+  return Math.max(1, Math.min(15, val));
+}
+
+function adjustStat(key, delta) {
+  const newVal = baseStats[key] + delta;
+  if (newVal < 1 || newVal > 15) return;
+  const totalUsed = STAT_DEFS.reduce((s,d) => s + baseStats[d.key], 0);
+  const base = 36; // 6*6
+  const used = totalUsed - base;
+  if (delta > 0 && used >= freePoints) return;
+  baseStats[key] = newVal;
+  updateStatRows();
+}
+
+function updatePoints() {
+  const totalUsed = STAT_DEFS.reduce((s,d) => s + baseStats[d.key], 0);
+  const base = 36;
+  const used = totalUsed - base;
+  const left = freePoints - used;
+  document.getElementById('pts-num').textContent = left;
+  document.getElementById('points-left').innerHTML = `剩余可分配点数：<span id="pts-num" style="color:${left>0?'#ea580c':'#16a34a'}">${left}</span>`;
+  document.getElementById('pts-num').textContent = left;
+}
+
+// ========== 游戏开始 ==========
+function startGame() {
+  if (!selectedOrigin) { alert('请选择你的出身！'); return; }
+  if (selectedTraits.length < 2) { alert('请选择2个性格特质！'); return; }
+
+  const name = document.getElementById('player-name').value.trim() || '打工人小张';
+  const origin = ORIGINS.find(o => o.id === selectedOrigin);
+
+  // 构建玩家对象
+  const stats = {};
+  STAT_DEFS.forEach(s => { stats[s.key] = getFinalStat(s.key); });
+
+  player = {
+    name,
+    origin: selectedOrigin,
+    traits: [...selectedTraits],
+    dept: selectedDept,
+    stats,
+    status: {
+      boss_favor: 50,
+      peer_rel: 50,
+      kpi: 0,
+      loyalty: 60,
+      health_cur: stats.health * 6,
+      mental_cur: stats.mental * 6,
+      anxiety: 20,
+      flamboyance: 30
+    },
+    money: 5000 + (origin.extraMoney || 0),
+    month: 1,
+    flags: {},
+    resetCount: origin.passive === 'double' ? 1 : 0,
+    history: [],
+    monthlyKpiBonus: 1.0
+  };
+
+  if (origin.passive === 'spotlight') player.status.flamboyance += 20;
+
+  // 特质月度效果处理
+  if (selectedTraits.includes('slacker')) player.monthlyKpiBonus = 0.8;
+  if (selectedTraits.includes('hardwork')) player.monthlyKpiBonus = 1.15;
+
+  document.getElementById('screen-create').style.display = 'none';
+  document.getElementById('screen-game').style.display = 'block';
+  document.getElementById('month-badge').style.display = 'flex';
+
+  startMonth();
+}
+
+// ========== 月份开始 ==========
+function startMonth() {
+  document.getElementById('month-num').textContent = player.month;
+  document.getElementById('screen-game').style.display = 'block';
+  document.getElementById('screen-settlement').style.display = 'none';
+
+  // 更新状态栏
+  renderStatusPanel();
+
+  // 设置内网新闻
+  document.getElementById('news-text').textContent = MONTHLY_NEWS[player.month - 1] || '公司一切正常，大家继续努力。';
+
+  // 组建本月事件
+  currentEvents = [];
+  const mandatory = EVENTS[player.month] || [];
+  mandatory.forEach(e => currentEvents.push(e));
+
+  // 添加1-2个随机事件
+  const shuffled = [...RANDOM_EVENTS].sort(() => Math.random() - 0.5);
+  if (shuffled[0]) currentEvents.push(shuffled[0]);
+
+  currentEventIndex = 0;
+  showEvent();
+}
+
+function showEvent() {
+  if (currentEventIndex >= currentEvents.length) {
+    // 本月事件结束，月末结算
+    doMonthlySettlement();
+    return;
+  }
+
+  const evt = currentEvents[currentEventIndex];
+  document.getElementById('event-tag').textContent = evt.tag;
+  document.getElementById('event-title').textContent = evt.title;
+  document.getElementById('event-body').textContent = evt.body;
+
+  document.getElementById('result-area').style.display = 'none';
+  document.getElementById('next-btn').style.display = 'none';
+
+  const ca = document.getElementById('choices-area');
+  const keys = ['A','B','C','D'];
+  ca.innerHTML = evt.choices.map((c, i) => {
+    // 检查是否有flag限制
+    if (c.needFlag && !player.flags[c.needFlag]) {
+      return `<button class="choice-btn" style="opacity:.4;cursor:not-allowed" disabled>
+        <span class="choice-key">${keys[i]}.</span>${c.text}
+        <div class="choice-hint">⚠️ 需要特定条件才能选择</div>
+      </button>`;
+    }
+    return `<button class="choice-btn fade-in" onclick="makeChoice(${i})" style="animation-delay:${i*0.08}s">
+      <span class="choice-key">${keys[i]}.</span>${c.text}
+      ${c.hint ? `<div class="choice-hint">💡 ${c.hint}</div>` : ''}
+    </button>`;
+  }).join('');
+
+  document.getElementById('event-area').classList.add('fade-in');
+}
+
+function makeChoice(idx) {
+  const evt = currentEvents[currentEventIndex];
+  const choice = evt.choices[idx];
+  if (!choice || (choice.needFlag && !player.flags[choice.needFlag])) return;
+
+  document.getElementById('choices-area').innerHTML = '';
+
+  let result = '';
+  let deltas = {};
+  let isSuccess = true;
+
+  if (choice.direct) {
+    result = choice.direct.result || '';
+    deltas = choice.direct;
+    // 应用flags
+    if (choice.direct.flag) player.flags[choice.direct.flag] = true;
+  } else if (choice.check) {
+    const statVal = choice.check.isStatus ? player.status[choice.check.stat] : player.stats[choice.check.stat];
+    const roll = Math.floor(Math.random() * 20) + 1;
+    const total = statVal + roll;
+    isSuccess = total >= choice.check.diff;
+    if (isSuccess) {
+      result = choice.onSuccess.result || '';
+      deltas = choice.onSuccess;
+    } else {
+      result = choice.onFail.result || '';
+      deltas = choice.onFail;
+      isSuccess = false;
+    }
+  } else if (choice.checkDouble) {
+    let v1 = choice.checkDouble.isStatus ? player.status[choice.checkDouble.s1] : player.stats[choice.checkDouble.s1];
+    let v2 = choice.checkDouble.isStatus ? player.status[choice.checkDouble.s2] : player.stats[choice.checkDouble.s2];
+    isSuccess = (v1 + v2) >= choice.checkDouble.threshold;
+    if (isSuccess) {
+      result = choice.onSuccess.result || '';
+      deltas = choice.onSuccess;
+    } else {
+      result = choice.onFail.result || '';
+      deltas = choice.onFail;
+      isSuccess = false;
+    }
+  } else if (choice.random) {
+    isSuccess = Math.random() < (choice.opt1.prob || 0.5);
+    const picked = isSuccess ? choice.opt1 : choice.opt2;
+    result = picked.result || '';
+    deltas = picked;
+  }
+
+  // 应用delta到player
+  const deltaDisplay = {};
+  const statusKeys = ['boss_favor','peer_rel','kpi','loyalty','health_cur','mental_cur','anxiety','flamboyance'];
+  for (const [k, v] of Object.entries(deltas)) {
+    if (k === 'result' || k === 'flag') continue;
+    if (statusKeys.includes(k)) {
+      player.status[k] = Math.max(0, Math.min(100, (player.status[k]||0) + v));
+      if (v !== 0) deltaDisplay[k] = v;
+    } else if (k === 'money') {
+      player.money += v;
+      if (v !== 0) deltaDisplay[k] = v;
+    } else if (k in player.stats) {
+      player.stats[k] = Math.max(1, Math.min(15, player.stats[k] + v));
+      if (v !== 0) deltaDisplay[k] = v;
+    }
+  }
+  if (deltas.flag) player.flags[deltas.flag] = true;
+
+  // 特殊技能：数字注水flag
+  if (player.flags['data_inflate']) {
+    // 月底有概率触发核查事件（加到下月随机事件中）
+  }
+
+  renderStatusPanel();
+  showResult(result, deltaDisplay, isSuccess);
+}
+
+function showResult(text, deltas, isSuccess) {
+  const ra = document.getElementById('result-area');
+  ra.style.display = 'block';
+  ra.className = isSuccess ? 'fade-in' : 'fade-in fail';
+  document.getElementById('result-text').textContent = text;
+
+  const labelMap = {
+    boss_favor:'领导好感',peer_rel:'同事关系',kpi:'KPI',loyalty:'公司认同',
+    health_cur:'健康值',mental_cur:'精神值',anxiety:'焦虑值',flamboyance:'张扬度',
+    money:'存款',ability:'业务能力',eq:'情商',looks:'颜值',health:'体力',mental:'精神',background:'背景'
+  };
+
+  const dr = document.getElementById('delta-row');
+  dr.innerHTML = Object.entries(deltas).map(([k,v]) => {
+    const isPos = (k === 'anxiety') ? v < 0 : v > 0;
+    const sign = v > 0 ? '+' : '';
+    return `<span class="delta-badge ${isPos?'delta-pos':'delta-neg'}">${labelMap[k]||k} ${sign}${v}</span>`;
+  }).join('');
+
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+function nextEvent() {
+  currentEventIndex++;
+  document.getElementById('result-area').style.display = 'none';
+
+  // 检查是否有触发结局的条件
+  const endingCheck = checkImmedateEnding();
+  if (endingCheck) {
+    showEnding(endingCheck);
+    return;
+  }
+  showEvent();
+}
+
+function checkImmedateEnding() {
+  const s = player.status;
+  if (s.mental_cur <= 0) return 'ending_mental';
+  if (s.health_cur <= 0) return 'ending_health';
+  return null;
+}
+
+// ========== 月末结算 ==========
+function doMonthlySettlement() {
+  document.getElementById('screen-game').style.display = 'none';
+  document.getElementById('screen-settlement').style.display = 'block';
+
+  const month = player.month;
+  const s = player.status;
+
+  // 计算工资
+  const baseSalary = 8000;
+  const kpiBonus = Math.floor(s.kpi / 100 * 3000);
+  const totalSalary = baseSalary + kpiBonus;
+  player.money += totalSalary;
+
+  // KPI检查
+  let kpiMsg = '';
+  if (s.kpi < 20) { s.boss_favor -= 10; kpiMsg = '⚠️ KPI严重不足，领导找你谈话，好感度-10'; }
+  else if (s.kpi < 40) { s.boss_favor -= 5; kpiMsg = '📉 KPI未达标，领导皱眉，好感度-5'; }
+  else if (s.kpi >= 90) { s.boss_favor += 10; kpiMsg = '🎉 KPI超越目标！领导公开表扬，好感度+10'; }
+  else if (s.kpi >= 70) { s.boss_favor += 5; kpiMsg = '✅ KPI良好，领导满意，好感度+5'; }
+
+  // 特质效果
+  const traits = player.traits;
+  if (traits.includes('hardwork')) {
+    player.stats.ability = Math.min(15, player.stats.ability + 2);
+    s.health_cur = Math.max(0, s.health_cur - 3);
+    s.mental_cur = Math.max(0, s.mental_cur - 2);
+  }
+  if (traits.includes('social')) { s.anxiety += 3; }
+  if (traits.includes('slacker')) { player.money += 500; s.mental_cur = Math.min(100, s.mental_cur + 3); }
+  if (traits.includes('honest')) { s.loyalty = Math.min(100, s.loyalty + 2); }
+  if (traits.includes('self')) { player.money += 300; s.anxiety = Math.max(0, s.anxiety - 2); s.peer_rel -= 1; }
+  if (traits.includes('perfect')) { s.anxiety += 5; }
+
+  // 张扬度效果
+  if (s.flamboyance >= 70) { s.boss_favor = Math.max(0, s.boss_favor - 2); }
+  if (s.flamboyance <= 10) { s.boss_favor = Math.max(0, s.boss_favor - 1); }
+
+  // 焦虑自然衰减
+  if (s.boss_favor >= 50 && s.kpi >= 40 && s.mental_cur >= 30) {
+    s.anxiety = Math.max(0, s.anxiety - 5);
+  }
+
+  // 高焦虑影响
+  if (s.anxiety >= 80) {
+    s.health_cur = Math.max(0, s.health_cur - 5);
+    s.mental_cur = Math.max(0, s.mental_cur - 5);
+  }
+
+  // 精神低影响
+  if (s.mental_cur <= 20) {
+    s.anxiety += 5;
+  }
+
+  // 限制范围
+  Object.keys(s).forEach(k => { s[k] = Math.max(0, Math.min(100, s[k])); });
+
+  // 月末KPI重置（新月开始时保留20%）
+  const prevKpi = s.kpi;
+  s.kpi = Math.floor(s.kpi * 0.2);
+
+  // 渲染结算页
+  const settleTitle = document.getElementById('settle-title');
+  settleTitle.textContent = `第 ${month} 月结算`;
+  const rows = document.getElementById('settle-rows');
+  rows.innerHTML = `
+    <div class="settle-row"><span class="settle-label">📅 月份</span><span class="settle-val">第 ${month} 月</span></div>
+    <div class="settle-row"><span class="settle-label">💰 基础工资</span><span class="settle-val pos">+${baseSalary.toLocaleString()} 元</span></div>
+    <div class="settle-row"><span class="settle-label">📊 KPI绩效（${prevKpi}分）</span><span class="settle-val pos">+${kpiBonus.toLocaleString()} 元</span></div>
+    <div class="settle-row"><span class="settle-label">💵 本月到手</span><span class="settle-val pos" style="font-size:16px">+${totalSalary.toLocaleString()} 元</span></div>
+    <div class="settle-row"><span class="settle-label">🏦 当前存款</span><span class="settle-val" style="color:var(--blue)">${player.money.toLocaleString()} 元</span></div>
+    <div class="settle-row"><span class="settle-label">😊 领导好感</span><span class="settle-val" style="color:${s.boss_favor>=60?'var(--green)':'var(--red)'}">${s.boss_favor}</span></div>
+    <div class="settle-row"><span class="settle-label">🧠 精神状态</span><span class="settle-val" style="color:${s.mental_cur>=50?'var(--green)':'var(--red)'}">${s.mental_cur}</span></div>
+    <div class="settle-row"><span class="settle-label">😰 焦虑值</span><span class="settle-val" style="color:${s.anxiety>=60?'var(--red)':'var(--green)'}">${s.anxiety}</span></div>
+  `;
+
+  const warn = document.getElementById('settle-warn');
+  const warnings = [];
+  if (kpiMsg) warnings.push(kpiMsg);
+  if (s.anxiety >= 80) warnings.push('⚠️ 焦虑值过高，身体和精神都在透支！');
+  if (s.mental_cur <= 20) warnings.push('⚠️ 精神值危险！再这样下去会崩溃的……');
+  if (s.health_cur <= 20) warnings.push('⚠️ 健康值告急！你需要好好休息了。');
+  if (s.boss_favor <= 20) warnings.push('⚠️ 领导好感极低，你已经被列为重点观察对象。');
+  if (player.money <= 0) warnings.push('💸 存款见底了！生活压力骤增。');
+  warn.innerHTML = warnings.map(w => `<div class="settle-warning">${w}</div>`).join('');
+
+  const nextBtn = document.getElementById('settle-next-btn');
+  if (player.month >= 12) {
+    nextBtn.textContent = '查看最终结局 →';
+    nextBtn.onclick = () => triggerFinalEnding();
+  } else {
+    nextBtn.textContent = `进入第 ${player.month + 1} 月 →`;
+    nextBtn.onclick = () => {
+      player.month++;
+      document.getElementById('screen-settlement').style.display = 'none';
+      startMonth();
+    };
+  }
+
+  renderStatusPanel();
+}
+
+// ========== 结局 ==========
+const ENDINGS = {
+  ending_mental: {
+    emoji:'😶‍🌫️', title:'精神崩溃', badge:'💊 系统错误',
+    body:`在某个凌晨，你对着电脑屏幕发呆了两个小时，发现自己不知道在哭什么。
+你请了两周病假，慢慢好了一些，但再也没有回到那个工位。
+后来你在社交平台上发了一条文字："职场不会毁掉你，但会让你找到自己的极限。"
+获得了3248个收藏。`},
+  ending_health: {
+    emoji:'🏥', title:'住院了', badge:'💊 过劳预警',
+    body:`你在某次加班后倒下了，被同事送去了医院。医生说：急性胃炎加重度疲劳。
+你在病房里刷着手机，发现领导发来了一条消息："好好养病，工作的事先别担心。"
+你不知道该感动还是苦笑。`},
+  ending_fired: {
+    emoji:'📦', title:'被优化了', badge:'📤 工位已清',
+    body:`"公司最近业务调整……"领导用最标准的措辞告诉你这个消息。
+你意外地没有太多情绪。
+打包的时候，你发现抽屉里有一张半年前团建时的合影——那时大家脸上都有光。
+赔偿金到账那天，你在公司楼下坐了很久。`},
+  ending_clearheaded_exit: {
+    emoji:'🚀', title:'体面离场', badge:'✈️ 精明的出走者',
+    body:`你带着在华夏幸福练就的招商技能和人脉，去了另一家公司。
+薪资涨了25%，工作量涨了20%，但你睡得更踏实了。
+偶尔会刷到华夏幸福的新闻，你会平静地划过去。
+那一年，不是浪费，是学费。`},
+  ending_promoted: {
+    emoji:'👑', title:'晋升主管', badge:'🌿 常青不倒翁',
+    body:`你成为了最年轻的产业招商主管。
+年终会上，你作为优秀员工代表发言，说了一段关于"坚守与成长"的话。
+台下的新校招生认真地记着笔记。
+你想起一年前自己站在走廊找不到工位的样子，忍住了想笑。`},
+  ending_ordinary: {
+    emoji:'🫥', title:'平安度过了一年', badge:'🌀 存在即合理',
+    body:`12月31日，你坐在工位上。公司还在。你还在。
+你没有辉煌，没有崩溃，没有被裁，也没有被表扬。
+旁边的新工位上，坐着一个刚入职的校招生，一脸懵逼地在走廊找位置。
+你想了想，起身走过去说："跟我来，我带你找。"`},
+  ending_loyalist: {
+    emoji:'💫', title:'华幸脑诞生', badge:'🔒 忠诚的代价待定',
+    body:`你真的相信这家公司会好起来。
+你在工作群里第一个转发领导的朋友圈，用的还是他最期待的表情。
+你学会了用"阶段性困难"来理解一切，用"公司正在转型"来说服自己。
+你是最晚离开的那批人之一，也是离开时最迷茫的一个。`},
+  ending_labor_rights: {
+    emoji:'⚖️', title:'劳动仲裁战士', badge:'💪 正义虽迟但到',
+    body:`你最终赢了仲裁，拿到了你应得的钱。
+工作自然是没有了，但你写的那篇帖子《华夏幸福打工人的12个月》获得了四万多个收藏。
+有人私信你"谢谢你给了我勇气"。
+你想，这一年，值了。`},
+  ending_slacker: {
+    emoji:'🐢', title:'摸鱼大师', badge:'🎣 从容人生',
+    body:`你发现，公司越乱，对摸鱼越有利。
+人人都在焦虑，反而没人注意你在摆烂。
+你的心理健康是部门第一，存款稳健增长，精神状态良好。
+你开始怀疑：努力和摸鱼，到底哪个才是正确答案？`},
+  ending_fund_loss: {
+    emoji:'💸', title:'血本无归', badge:'😭 50000元的教训',
+    body:`你认购的5万元内部基金，随着公司债务重组方案的公布，变成了一个漫长等待的故事。
+你不知道能拿回多少，也不知道要等多久。
+那一刻，你真正理解了什么叫"流动性风险"。`},
+  ending_loop: {
+    emoji:'🌀', title:'时间的循环', badge:'🔄 什么都没发生',
+    body:`12月31日，你坐在工位上。
+和一年前的区别是，你的工位旁边多了一个叫"小张"的新校招生，正一脸懵逼地站在走廊里。
+你抬起头，然后低下头，继续工作。
+循环，永远不会结束。`}
+};
+
+function triggerFinalEnding() {
+  const s = player.status;
+  const f = player.flags;
+  let endingId = 'ending_ordinary';
+
+  if (f.fund_bought_big && f.clearheaded) { endingId = 'ending_fund_loss'; }
+  else if (f.labor_rights) { endingId = 'ending_labor_rights'; }
+  else if (f.resign_track || f.resigned_gracefully) { endingId = 'ending_clearheaded_exit'; }
+  else if (s.boss_favor >= 80 && s.kpi >= 75) { endingId = 'ending_promoted'; }
+  else if (s.mental_cur <= 5) { endingId = 'ending_mental'; }
+  else if (s.loyalty >= 85 && player.stats.ability <= 7) { endingId = 'ending_loyalist'; }
+  else if (s.boss_favor <= 25 && s.kpi <= 30) { endingId = 'ending_fired'; }
+  else if (s.mental_cur >= 80 && s.kpi <= 40) { endingId = 'ending_slacker'; }
+  else if (f.clearheaded && s.loyalty <= 40) { endingId = 'ending_clearheaded_exit'; }
+  else if (f.invisible_1 && s.flamboyance <= 15) { endingId = 'ending_loop'; }
+  else { endingId = 'ending_ordinary'; }
+
+  showEnding(endingId);
+}
+
+function showEnding(id) {
+  const ending = ENDINGS[id] || ENDINGS['ending_ordinary'];
+  document.getElementById('screen-game').style.display = 'none';
+  document.getElementById('screen-settlement').style.display = 'none';
+  document.getElementById('screen-ending').style.display = 'block';
+  document.getElementById('month-badge').style.display = 'none';
+
+  document.getElementById('ending-emoji').textContent = ending.emoji;
+  document.getElementById('ending-title').textContent = ending.title;
+  document.getElementById('ending-badge').textContent = ending.badge;
+  document.getElementById('ending-body').textContent = ending.body;
+
+  const s = player.status;
+  document.getElementById('ending-stats').innerHTML = `
+    <div class="es-item"><div class="es-label">坚持了</div><div class="es-val">${player.month}个月</div></div>
+    <div class="es-item"><div class="es-label">最终存款</div><div class="es-val">¥${player.money.toLocaleString()}</div></div>
+    <div class="es-item"><div class="es-label">领导好感</div><div class="es-val">${s.boss_favor}</div></div>
+    <div class="es-item"><div class="es-label">精神状态</div><div class="es-val">${s.mental_cur}</div></div>
+    <div class="es-item"><div class="es-label">KPI</div><div class="es-val">${s.kpi}</div></div>
+    <div class="es-item"><div class="es-label">公司认同</div><div class="es-val">${s.loyalty}</div></div>
+  `;
+
+  document.getElementById('screen-ending').classList.add('fade-in');
+}
+
+// ========== 状态面板渲染 ==========
+function renderStatusPanel() {
+  const s = player.status;
+  const colorMap = {
+    boss_favor:'fill-blue', peer_rel:'fill-green', kpi:'fill-orange',
+    loyalty:'fill-purple', health_cur:'fill-green', mental_cur:'fill-yellow', anxiety:'fill-red'
+  };
+  const labelMap = {
+    boss_favor:'领导好感', peer_rel:'同事关系', kpi:'KPI',
+    loyalty:'公司认同', health_cur:'健康值', mental_cur:'精神值', anxiety:'焦虑值'
+  };
+
+  const grid = document.getElementById('status-grid');
+  grid.innerHTML = Object.entries(s).filter(([k])=>labelMap[k]).map(([k,v]) => {
+    const color = colorMap[k];
+    const isAnxiety = k === 'anxiety';
+    const fillPct = v;
+    const barColor = isAnxiety
+      ? (v >= 80 ? 'fill-red' : v >= 60 ? 'fill-orange' : 'fill-yellow')
+      : (v <= 20 ? 'fill-red' : v <= 40 ? 'fill-yellow' : color);
+    return `<div class="stat-item">
+      <div class="si-label">${labelMap[k]}</div>
+      <div class="si-val">${v}</div>
+      <div class="progress-wrap"><div class="progress-fill ${barColor}" style="width:${fillPct}%"></div></div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('money-num').textContent = player.money.toLocaleString();
+}
+
+// ========== 导航 ==========
+function showCover() {
+  document.getElementById('screen-cover').style.display = 'block';
+  document.getElementById('screen-create').style.display = 'none';
+}
+
+function showCreate() {
+  document.getElementById('screen-cover').style.display = 'none';
+  document.getElementById('screen-create').style.display = 'block';
+  document.getElementById('screen-create').classList.add('fade-in');
+  initCreateScreen();
+}
+
+function restartGame() {
+  player = {};
+  currentEvents = [];
+  currentEventIndex = 0;
+  document.getElementById('screen-ending').style.display = 'none';
+  document.getElementById('screen-cover').style.display = 'block';
+  document.getElementById('screen-cover').classList.add('fade-in');
+  document.getElementById('month-badge').style.display = 'none';
+}
+
+// 初始隐藏所有游戏屏幕
+document.getElementById('screen-create').style.display = 'none';
+document.getElementById('screen-game').style.display = 'none';
+document.getElementById('screen-settlement').style.display = 'none';
+document.getElementById('screen-ending').style.display = 'none';
+</script>
+</body>
+</html>
